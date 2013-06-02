@@ -17,7 +17,7 @@ deps:
 	go get -x $(TARGETS)
 
 serve:
-	$${GOPATH%%:*}/bin/hookworm-server -a $(ADDR)
+	$${GOPATH%%:*}/bin/hookworm-server -a $(ADDR) -S
 
 
 .PHONY: all test build deps
