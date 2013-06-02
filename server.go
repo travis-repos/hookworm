@@ -75,6 +75,7 @@ func (me *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal([]byte(rawPayload), payload)
 	if err != nil {
 		log.Println("Failed to unmarshal payload: ", err)
+		log.Println("Raw payload: ", rawPayload)
 		w.WriteHeader(status)
 		return
 	}
