@@ -94,6 +94,7 @@ func (me *Server) logEvent(payload *Payload) {
 	}
 	asJson := string(asJsonBytes)
 
+	log.Printf("pull request merge? %v", payload.IsPullRequestMerge())
 	log.Printf("payload=%+v", payload)
 	log.Printf("payload json=%v", asJson)
 
