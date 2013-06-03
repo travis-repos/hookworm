@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"sort"
 	"strings"
 	"text/template"
@@ -11,12 +12,13 @@ import (
 )
 
 var (
-	rfc2822DateFmt        = "Mon, 01 Jan 15:04:05 -0700"
+	rfc2822DateFmt        = "Mon, 02 Jan 2006 15:04:05 -0700"
+	hostname              string
 	secretCommitEmailTmpl = template.Must(template.New("email").Parse(`From: {{.From}}
 To: {{.Recipients}}
 Subject: [hookworm] Secret commit! {{.Repo}} {{.Ref}} {{.HeadCommitId}}
 Date: {{.Date}}
-Message-ID: {{.MessageId}}
+Message-ID: <{{.MessageId}}@{{.Hostname}}>
 Content-Type: text/html; charset=utf8
 
 <h1>Secret commit detected on {{.Repo}} {{.Ref}}</h1>
@@ -31,6 +33,14 @@ Content-Type: text/html; charset=utf8
 `))
 )
 
+func init() {
+	var err error
+	hostname, err = os.Hostname()
+	if err != nil {
+		hostname = "somewhere.local"
+	}
+}
+
 type SecretSquirrelCommitHandler struct {
 	emailer        *Emailer
 	fromAddr       string
@@ -44,6 +54,7 @@ type secretCommitEmailContext struct {
 	Recipients          string
 	Date                string
 	MessageId           string
+	Hostname            string
 	Repo                string
 	Ref                 string
 	HeadCommitId        string
@@ -101,6 +112,7 @@ func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
 		Recipients: strings.Join(me.recipients, ", "),
 		Date:       time.Now().UTC().Format(rfc2822DateFmt),
 		MessageId:  fmt.Sprintf("%v", time.Now().UTC().UnixNano()),
+		Hostname:   hostname,
 		Repo: fmt.Sprintf("%s/%s", payload.Repository.Owner.Name.String(),
 			payload.Repository.Name.String()),
 		Ref:                 payload.Ref.String(),
