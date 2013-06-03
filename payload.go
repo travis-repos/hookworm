@@ -2,24 +2,34 @@ package hookworm
 
 import (
 	"bytes"
+	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
+var pullRequestMessageRe = regexp.MustCompile("Merge pull request #[0-9]+ from.*")
+
 type Payload struct {
-	Ref        *NullableString   `json:"ref"`
-	After      *NullableString   `json:"after"`
-	Before     *NullableString   `json:"before"`
-	Created    *NullableBool     `json:"created"`
-	Deleted    *NullableBool     `json:"deleted"`
-	Forced     *NullableBool     `json:"forced"`
-	Compare    *NullableString   `json:"compare"`
-	Commits    []*NullableString `json:"commits"`
-	HeadCommit *HeadCommit       `json:"head_commit"`
-	Repository *Repository       `json:"repository"`
-	Pusher     *Pusher           `json:"pusher"`
+	Ref        *NullableString `json:"ref"`
+	After      *NullableString `json:"after"`
+	Before     *NullableString `json:"before"`
+	Created    *NullableBool   `json:"created"`
+	Deleted    *NullableBool   `json:"deleted"`
+	Forced     *NullableBool   `json:"forced"`
+	Compare    *NullableString `json:"compare"`
+	Commits    []*Commit       `json:"commits"`
+	HeadCommit *Commit         `json:"head_commit"`
+	Repository *Repository     `json:"repository"`
+	Pusher     *Pusher         `json:"pusher"`
 }
 
-type HeadCommit struct {
+func (me *Payload) IsPullRequestMerge() bool {
+	return len(me.Commits) > 1 &&
+		pullRequestMessageRe.Match([]byte(me.HeadCommit.Message.String()))
+}
+
+type Commit struct {
 	Id        *NullableString   `json:"id"`
 	Distinct  *NullableBool     `json:"distinct"`
 	Message   *NullableString   `json:"message"`
@@ -80,7 +90,7 @@ func (me *NullableString) UnmarshalJSON(raw []byte) error {
 		me.isNull = true
 		return nil
 	}
-	me.value = string(raw)
+	me.value = strings.TrimRight(strings.TrimLeft(string(raw), "\""), "\"")
 	return nil
 }
 
@@ -88,7 +98,11 @@ func (me *NullableString) MarshalJSON() ([]byte, error) {
 	if me.isNull {
 		return []byte("null"), nil
 	}
-	return []byte(me.value), nil
+	return []byte(fmt.Sprintf("%q", me.value)), nil
+}
+
+func (me *NullableString) String() string {
+	return string(me.value)
 }
 
 type NullableInt64 struct {
@@ -117,6 +131,10 @@ func (me *NullableInt64) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(me.value, 10)), nil
 }
 
+func (me *NullableInt64) String() string {
+	return strconv.FormatInt(me.value, 10)
+}
+
 type NullableBool struct {
 	value  bool
 	isNull bool
@@ -141,4 +159,8 @@ func (me *NullableBool) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 	return []byte(strconv.FormatBool(me.value)), nil
+}
+
+func (me *NullableBool) String() string {
+	return strconv.FormatBool(me.value)
 }
