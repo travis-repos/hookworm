@@ -3,6 +3,7 @@ package hookworm
 import (
 	"log"
 	"log/syslog"
+	"sort"
 )
 
 type HandlerConfig struct {
@@ -34,6 +35,7 @@ func NewHandlerPipeline(cfg *HandlerConfig) Handler {
 	}
 
 	if len(cfg.StableBranches) > 0 {
+		sort.Strings(cfg.StableBranches)
 		sscHandler := &SecretSquirrelCommitHandler{
 			emailer:        NewEmailer(cfg.EmailUri),
 			fromAddr:       cfg.EmailFromAddr,
