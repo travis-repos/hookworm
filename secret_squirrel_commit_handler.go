@@ -42,11 +42,11 @@ func init() {
 }
 
 type SecretSquirrelCommitHandler struct {
-	emailer        *Emailer
-	fromAddr       string
-	recipients     []string
-	stableBranches []string
-	nextHandler    Handler
+	emailer         *Emailer
+	fromAddr        string
+	recipients      []string
+	policedBranches []string
+	nextHandler     Handler
 }
 
 type secretCommitEmailContext struct {
@@ -79,12 +79,12 @@ func (me *SecretSquirrelCommitHandler) NextHandler() Handler {
 }
 
 func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payload) {
-	if !me.isStableBranch(payload.Ref.String()) {
-		log.Printf("%v is not a stable branch, yay!\n", payload.Ref.String())
+	if !me.isPolicedBranch(payload.Ref.String()) {
+		log.Printf("%v is not a policed branch, yay!\n", payload.Ref.String())
 		return
 	}
 
-	log.Printf("%v is a stable branch!\n", payload.Ref.String())
+	log.Printf("%v is a policed branch!\n", payload.Ref.String())
 
 	if payload.IsPullRequestMerge() {
 		log.Printf("%v is a pull request merge, yay!\n", payload.HeadCommit.Id.String())
@@ -101,10 +101,10 @@ func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payl
 	log.Printf("Sent alert to %+v\n", me.recipients)
 }
 
-func (me *SecretSquirrelCommitHandler) isStableBranch(ref string) bool {
+func (me *SecretSquirrelCommitHandler) isPolicedBranch(ref string) bool {
 	sansRefsHeads := strings.Replace(ref, "refs/heads/", "", 1)
-	log.Printf("Looking for %v in %+v\n", sansRefsHeads, me.stableBranches)
-	return sort.SearchStrings(me.stableBranches, sansRefsHeads) < len(me.stableBranches)
+	log.Printf("Looking for %v in %+v\n", sansRefsHeads, me.policedBranches)
+	return sort.SearchStrings(me.policedBranches, sansRefsHeads) < len(me.policedBranches)
 }
 
 func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
