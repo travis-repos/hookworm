@@ -11,13 +11,13 @@ import (
 )
 
 var (
-	addrFlag           = flag.String("a", ":9988", "Server address")
-	emailFlag          = flag.String("e", "smtp://localhost", "Email server address")
-	emailFromFlag      = flag.String("f", "hookworm@localhost", "Email from address")
-	emailRcptsFlag     = flag.String("r", "", "Email recipients (comma-delimited)")
-	stableBranchesFlag = flag.String("b", "", "Stable branches (comma-delimited)")
-	useSyslogFlag      = flag.Bool("S", false, "Send all received events to syslog")
-	printVersionFlag   = flag.Bool("v", false, "Print version and exit")
+	addrFlag            = flag.String("a", ":9988", "Server address")
+	emailFlag           = flag.String("e", "smtp://localhost", "Email server address")
+	emailFromFlag       = flag.String("f", "hookworm@localhost", "Email from address")
+	emailRcptsFlag      = flag.String("r", "", "Email recipients (comma-delimited)")
+	policedBranchesFlag = flag.String("b", "", "Policed branches (comma-delimited)")
+	useSyslogFlag       = flag.Bool("S", false, "Send all received events to syslog")
+	printVersionFlag    = flag.Bool("v", false, "Print version and exit")
 
 	logTimeFmt = "2/Jan/2006:15:04:05 -0700" // "%d/%b/%Y:%H:%M:%S %z"
 )
@@ -34,11 +34,11 @@ func ServerMain() {
 	}
 
 	cfg := &HandlerConfig{
-		EmailUri:       *emailFlag,
-		EmailFromAddr:  *emailFromFlag,
-		EmailRcpts:     commaSplit(*emailRcptsFlag),
-		UseSyslog:      *useSyslogFlag,
-		StableBranches: commaSplit(*stableBranchesFlag),
+		EmailUri:        *emailFlag,
+		EmailFromAddr:   *emailFromFlag,
+		EmailRcpts:      commaSplit(*emailRcptsFlag),
+		UseSyslog:       *useSyslogFlag,
+		PolicedBranches: commaSplit(*policedBranchesFlag),
 	}
 
 	log.Printf("Using handler config: %+v\n", cfg)

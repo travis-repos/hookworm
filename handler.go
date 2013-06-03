@@ -3,15 +3,14 @@ package hookworm
 import (
 	"log"
 	"log/syslog"
-	"sort"
 )
 
 type HandlerConfig struct {
-	EmailUri       string
-	EmailFromAddr  string
-	EmailRcpts     []string
-	UseSyslog      bool
-	StableBranches []string
+	EmailUri        string
+	EmailFromAddr   string
+	EmailRcpts      []string
+	UseSyslog       bool
+	PolicedBranches []string
 }
 
 type Handler interface {
@@ -34,17 +33,16 @@ func NewHandlerPipeline(cfg *HandlerConfig) Handler {
 		log.Println("No syslog logger added to event handler")
 	}
 
-	if len(cfg.StableBranches) > 0 {
-		sort.Strings(cfg.StableBranches)
+	if len(cfg.PolicedBranches) > 0 {
 		sscHandler := &SecretSquirrelCommitHandler{
-			emailer:        NewEmailer(cfg.EmailUri),
-			fromAddr:       cfg.EmailFromAddr,
-			recipients:     cfg.EmailRcpts,
-			stableBranches: cfg.StableBranches,
+			emailer:         NewEmailer(cfg.EmailUri),
+			fromAddr:        cfg.EmailFromAddr,
+			recipients:      cfg.EmailRcpts,
+			policedBranches: cfg.PolicedBranches,
 		}
 		elHandler.SetNextHandler(sscHandler)
-		log.Printf("Added secret squirrel handler for stable branches %+v\n",
-			cfg.StableBranches)
+		log.Printf("Added secret squirrel handler for policed branches %+v\n",
+			cfg.PolicedBranches)
 	} else {
 		log.Println("No secret squirrel handler added")
 	}
