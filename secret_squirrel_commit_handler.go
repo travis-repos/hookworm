@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -103,10 +102,12 @@ func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payl
 
 func (me *SecretSquirrelCommitHandler) isPolicedBranch(ref string) bool {
 	sansRefsHeads := strings.Replace(ref, "refs/heads/", "", 1)
-	log.Printf("Looking for %v in %+v\n", sansRefsHeads, me.policedBranches)
-	pos := sort.SearchStrings(me.policedBranches, sansRefsHeads)
-	log.Printf("SearchStrings returned %v, len(policedBranches) = %v", pos, len(me.policedBranches))
-	return pos > -1 && pos < len(me.policedBranches)
+	for _, ref := range me.policedBranches {
+		if ref == sansRefsHeads {
+			return true
+		}
+	}
+	return false
 }
 
 func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
