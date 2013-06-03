@@ -1,6 +1,9 @@
 TARGETS := \
 	github.com/modcloth-labs/hookworm \
 	github.com/modcloth-labs/hookworm/hookworm-server
+VERSION_VAR := github.com/modcloth-labs/hookworm.VersionString
+REPO_VERSION := $(shell git describe --always --dirty --tags)
+GOBUILD_VERSION_ARGS := -ldflags "-X $(VERSION_VAR) $(REPO_VERSION)"
 
 ADDR := :9988
 
@@ -8,13 +11,13 @@ ADDR := :9988
 all: test
 
 test: build
-	go test -v $(TARGETS)
+	go test $(GOBUILD_VERSION_ARGS) -x -v $(TARGETS)
 
 build: deps
-	go install -x $(TARGETS)
+	go install $(GOBUILD_VERSION_ARGS) -x $(TARGETS)
 
 deps:
-	go get -x $(TARGETS)
+	go get $(GOBUILD_VERSION_ARGS) -x $(TARGETS)
 
 serve:
 	$${GOPATH%%:*}/bin/hookworm-server -a $(ADDR) -S
