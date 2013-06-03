@@ -104,7 +104,9 @@ func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payl
 func (me *SecretSquirrelCommitHandler) isPolicedBranch(ref string) bool {
 	sansRefsHeads := strings.Replace(ref, "refs/heads/", "", 1)
 	log.Printf("Looking for %v in %+v\n", sansRefsHeads, me.policedBranches)
-	return sort.SearchStrings(me.policedBranches, sansRefsHeads) < len(me.policedBranches)
+	pos := sort.SearchStrings(me.policedBranches, sansRefsHeads)
+	log.Printf("SearchStrings returned %v, len(policedBranches) = %v", pos, len(me.policedBranches))
+	return pos < len(me.policedBranches)
 }
 
 func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
