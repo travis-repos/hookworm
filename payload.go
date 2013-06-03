@@ -2,8 +2,10 @@ package hookworm
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var pullRequestMessageRe = regexp.MustCompile("Merge pull request #[0-9]+ from.*")
@@ -88,7 +90,7 @@ func (me *NullableString) UnmarshalJSON(raw []byte) error {
 		me.isNull = true
 		return nil
 	}
-	me.value = string(raw)
+	me.value = strings.TrimRight(strings.TrimLeft(string(raw), "\""), "\"")
 	return nil
 }
 
@@ -96,7 +98,7 @@ func (me *NullableString) MarshalJSON() ([]byte, error) {
 	if me.isNull {
 		return []byte("null"), nil
 	}
-	return []byte(me.value), nil
+	return []byte(fmt.Sprintf("%q", me.value)), nil
 }
 
 func (me *NullableString) String() string {

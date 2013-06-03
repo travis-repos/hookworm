@@ -18,9 +18,9 @@ func (me *EventLogHandler) HandlePayload(payload *Payload) error {
 	}
 	asJson := string(asJsonBytes)
 
-	log.Printf("pull request merge? %v", payload.IsPullRequestMerge())
-	log.Printf("payload=%+v", payload)
-	log.Printf("payload json=%v", asJson)
+	log.Printf("pull request merge? %v\n", payload.IsPullRequestMerge())
+	log.Printf("payload=%+v\n", payload)
+	log.Printf("payload json=%v\n", asJson)
 
 	if me.sysLogger != nil {
 		me.sysLogger.Println(asJson)

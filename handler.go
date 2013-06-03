@@ -7,6 +7,7 @@ import (
 
 type HandlerConfig struct {
 	EmailUri       string
+	EmailFromAddr  string
 	EmailRcpts     []string
 	UseSyslog      bool
 	StableBranches []string
@@ -34,12 +35,13 @@ func NewHandlerPipeline(cfg *HandlerConfig) Handler {
 
 	if len(cfg.StableBranches) > 0 {
 		sscHandler := &SecretSquirrelCommitHandler{
-			emailer:        &Emailer{serverUri: cfg.EmailUri},
+			emailer:        NewEmailer(cfg.EmailUri),
+			fromAddr:       cfg.EmailFromAddr,
 			recipients:     cfg.EmailRcpts,
 			stableBranches: cfg.StableBranches,
 		}
 		elHandler.SetNextHandler(sscHandler)
-		log.Printf("Added secret squirrel handler for stable branches %+v",
+		log.Printf("Added secret squirrel handler for stable branches %+v\n",
 			cfg.StableBranches)
 	} else {
 		log.Println("No secret squirrel handler added")

@@ -12,7 +12,8 @@ import (
 
 var (
 	addrFlag           = flag.String("a", ":9988", "Server address")
-	emailFlag          = flag.String("e", "smtp://localhost:25", "Email server address")
+	emailFlag          = flag.String("e", "smtp://localhost", "Email server address")
+	emailFromFlag      = flag.String("f", "hookworm@localhost", "Email from address")
 	emailRcptsFlag     = flag.String("r", "", "Email recipients (comma-delimited)")
 	stableBranchesFlag = flag.String("b", "", "Stable branches (comma-delimited)")
 	useSyslogFlag      = flag.Bool("S", false, "Send all received events to syslog")
@@ -34,18 +35,20 @@ func ServerMain() {
 
 	cfg := &HandlerConfig{
 		EmailUri:       *emailFlag,
-		UseSyslog:      *useSyslogFlag,
+		EmailFromAddr:  *emailFromFlag,
 		EmailRcpts:     commaSplit(*emailRcptsFlag),
+		UseSyslog:      *useSyslogFlag,
 		StableBranches: commaSplit(*stableBranchesFlag),
 	}
 
+	log.Printf("Using handler config: %+v\n", cfg)
 	server := NewServer(cfg)
 	if server == nil {
 		log.Fatal("No server?  No worky!")
 	}
 
 	http.Handle("/", server)
-	log.Printf("Listening on %v", *addrFlag)
+	log.Printf("Listening on %v\n", *addrFlag)
 	log.Fatal(http.ListenAndServe(*addrFlag, nil))
 }
 
