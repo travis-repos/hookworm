@@ -83,9 +83,13 @@ func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payl
 		return
 	}
 
+	log.Printf("%v is a stable branch!\n", payload.Ref.String())
+
 	if payload.IsPullRequestMerge() {
 		return
 	}
+
+	log.Printf("%v is not a pull request merge!\n", payload.HeadCommit.Id.String())
 
 	if err := me.alert(payload); err != nil {
 		log.Printf("ERROR sending alert: %+v\n", err)
@@ -96,7 +100,8 @@ func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payl
 }
 
 func (me *SecretSquirrelCommitHandler) isStableBranch(ref string) bool {
-	return sort.SearchStrings(me.stableBranches, ref) > -1
+	return sort.SearchStrings(me.stableBranches,
+		strings.Replace(ref, "refs/heads/", "", 1)) > -1
 }
 
 func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
