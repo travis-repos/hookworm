@@ -51,11 +51,11 @@ Content-Transfer-Encoding: 7bit
   <table>
     <thead><th></th><th></th></thead>
     <tbody>
-      <tr><td>Id</td><td><a href="{{.HeadCommitUrl}}">{{.HeadCommitId}}</a></td></tr>
-      <tr><td>Message</td><td>{{.HeadCommitMessage}}</td></tr>
-      <tr><td>Author</td><td>{{.HeadCommitAuthor}}</td></tr>
-      <tr><td>Committer</td><td>{{.HeadCommitCommitter}}</td></tr>
-      <tr><td>Timestamp</td><td>{{.HeadCommitTimestamp}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Id</strong>:</td><td><a href="{{.HeadCommitUrl}}">{{.HeadCommitId}}</a></td></tr>
+      <tr><td style="text-align:right;"><strong>Message</strong>:</td><td>{{.HeadCommitMessage}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Author</strong>:</td><td>{{.HeadCommitAuthor}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Committer</strong>:</td><td>{{.HeadCommitCommitter}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Timestamp</strong>:</td><td>{{.HeadCommitTimestamp}}</td></tr>
     </tbody>
   </table>
 </div>
