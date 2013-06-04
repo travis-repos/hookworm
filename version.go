@@ -16,9 +16,13 @@ func init() {
 }
 
 func printVersion() {
+	fmt.Println(progVersion())
+}
+
+func progVersion() string {
 	if VersionString == "" {
 		VersionString = "<unknown>"
 	}
 
-	fmt.Printf("%s %s\n", progName, VersionString)
+	return fmt.Sprintf("%s %s", progName, VersionString)
 }

@@ -31,6 +31,8 @@ func ServerMain() {
 	if *printVersionFlag {
 		printVersion()
 		return
+	} else {
+		log.Println("Starting", progVersion())
 	}
 
 	cfg := &HandlerConfig{
