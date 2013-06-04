@@ -2,3 +2,7 @@
 language: go
 install: cd $TRAVIS_BUILD_DIR && make build
 script: cd $TRAVIS_BUILD_DIR && make test
+notifications:
+  email:
+    recipients:
+     - d.buch@modcloth.com
