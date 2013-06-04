@@ -15,7 +15,7 @@ var (
 	hostname              string
 	secretCommitEmailTmpl = template.Must(template.New("email").Parse(`From: {{.From}}
 To: {{.Recipients}}
-Subject: [hookworm] Secret commit! {{.Repo}} {{.Ref}} {{.HeadCommitId}}
+Subject: [hookworm] Secret commit by {{.HeadCommitAuthor}} to {{.Repo}} {{.Ref}} ({{.HeadCommitId}})
 Date: {{.Date}}
 Message-ID: <{{.MessageId}}@{{.Hostname}}>
 List-ID: {{.Repo}} <hookworm.github.com>
@@ -30,8 +30,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf8
 Content-Transfer-Encoding: 7bit
 
-Secret commit detected on {{.Repo}} {{.Ref}}
+Secret commit detected!
 
+Repo      {{.Repo}}
+Ref       {{.Ref}}
 Id        {{.HeadCommitUrl}}
 Message   {{.HeadCommitMessage}}
 Author    {{.HeadCommitAuthor}}
@@ -46,11 +48,13 @@ Content-Type: text/html; charset=utf8
 Content-Transfer-Encoding: 7bit
 
 <div>
-  <h1>Secret commit detected on {{.Repo}} {{.Ref}}</h1>
+  <h1><a href="{{.HeadCommitUrl}}">Secret commit detected!</a></h1>
 
   <table>
     <thead><th></th><th></th></thead>
     <tbody>
+      <tr><td style="text-align:right;"><strong>Repo</strong>:</td><td>{{.Repo}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Ref</strong>:</td><td>{{.Ref}}</td></tr>
       <tr><td style="text-align:right;"><strong>Id</strong>:</td><td><a href="{{.HeadCommitUrl}}">{{.HeadCommitId}}</a></td></tr>
       <tr><td style="text-align:right;"><strong>Message</strong>:</td><td>{{.HeadCommitMessage}}</td></tr>
       <tr><td style="text-align:right;"><strong>Author</strong>:</td><td>{{.HeadCommitAuthor}}</td></tr>
