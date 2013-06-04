@@ -18,17 +18,49 @@ To: {{.Recipients}}
 Subject: [hookworm] Secret commit! {{.Repo}} {{.Ref}} {{.HeadCommitId}}
 Date: {{.Date}}
 Message-ID: <{{.MessageId}}@{{.Hostname}}>
+List-ID: {{.Repo}} <hookworm.github.com>
+Content-Type: multipart/alternative;
+  boundary="--==ZOMGBOUNDARAAAYYYYY";
+  charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+----==ZOMGBOUNDARAAAYYYYY
+Date: {{.Date}}
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf8
+Content-Transfer-Encoding: 7bit
+
+Secret commit detected on {{.Repo}} {{.Ref}}
+
+Id        {{.HeadCommitUrl}}
+Message   {{.HeadCommitMessage}}
+Author    {{.HeadCommitAuthor}}
+Committer {{.HeadCommitCommitter}}
+Timestamp {{.HeadCommitTimestamp}}
+
+
+----==ZOMGBOUNDARAAAYYYYY
+Date: {{.Date}}
+Mime-Version: 1.0
 Content-Type: text/html; charset=utf8
+Content-Transfer-Encoding: 7bit
 
-<h1>Secret commit detected on {{.Repo}} {{.Ref}}</h1>
+<div>
+  <h1>Secret commit detected on {{.Repo}} {{.Ref}}</h1>
 
-<dl>
-  <dt>Id</dt><dd><a href="{{.HeadCommitUrl}}">{{.HeadCommitId}}</a></dd>
-  <dt>Message</dt><dd>{{.HeadCommitMessage}}</dd>
-  <dt>Author</dt><dd>{{.HeadCommitAuthor}}</dd>
-  <dt>Committer</dt><dd>{{.HeadCommitCommitter}}</dd>
-  <dt>Timestamp</dt><dd>{{.HeadCommitTimestamp}}</dd>
-</dl>
+  <table>
+    <thead><th></th><th></th></thead>
+    <tbody>
+      <tr><td style="text-align:right;"><strong>Id</strong>:</td><td><a href="{{.HeadCommitUrl}}">{{.HeadCommitId}}</a></td></tr>
+      <tr><td style="text-align:right;"><strong>Message</strong>:</td><td>{{.HeadCommitMessage}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Author</strong>:</td><td>{{.HeadCommitAuthor}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Committer</strong>:</td><td>{{.HeadCommitCommitter}}</td></tr>
+      <tr><td style="text-align:right;"><strong>Timestamp</strong>:</td><td>{{.HeadCommitTimestamp}}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+----==ZOMGBOUNDARAAAYYYYY--
 `))
 )
 
