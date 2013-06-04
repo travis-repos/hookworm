@@ -11,19 +11,24 @@ import (
 )
 
 var (
-	addrFlag            = flag.String("a", ":9988", "Server address")
+	addrFlag = flag.String("a", ":9988", "Server address")
+
 	emailFlag           = flag.String("e", "smtp://localhost", "Email server address")
 	emailFromFlag       = flag.String("f", "hookworm@localhost", "Email from address")
 	emailRcptsFlag      = flag.String("r", "", "Email recipients (comma-delimited)")
 	policedBranchesFlag = flag.String("b", "", "Policed branches (comma-delimited)")
-	useSyslogFlag       = flag.Bool("S", false, "Send all received events to syslog")
-	printVersionFlag    = flag.Bool("v", false, "Print version and exit")
+
+	useSyslogFlag = flag.Bool("S", false, "Send all received events to syslog")
+
+	printVersionFlag = flag.Bool("v", false, "Print version and exit")
+	debugFlag        = flag.Bool("d", false, "Show debug output")
 
 	logTimeFmt = "2/Jan/2006:15:04:05 -0700" // "%d/%b/%Y:%H:%M:%S %z"
 )
 
 type Server struct {
 	pipeline Handler
+	debug    bool
 }
 
 func ServerMain() {
@@ -36,6 +41,7 @@ func ServerMain() {
 	}
 
 	cfg := &HandlerConfig{
+		Debug:           *debugFlag,
 		EmailUri:        *emailFlag,
 		EmailFromAddr:   *emailFromFlag,
 		EmailRcpts:      commaSplit(*emailRcptsFlag),
@@ -43,7 +49,9 @@ func ServerMain() {
 		PolicedBranches: commaSplit(*policedBranchesFlag),
 	}
 
-	log.Printf("Using handler config: %+v\n", cfg)
+	if *debugFlag {
+		log.Printf("Using handler config: %+v\n", cfg)
+	}
 	server := NewServer(cfg)
 	if server == nil {
 		log.Fatal("No server?  No worky!")
@@ -55,7 +63,10 @@ func ServerMain() {
 }
 
 func NewServer(cfg *HandlerConfig) *Server {
-	return &Server{pipeline: NewHandlerPipeline(cfg)}
+	return &Server{
+		pipeline: NewHandlerPipeline(cfg),
+		debug:    cfg.Debug,
+	}
 }
 
 func (me *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +89,9 @@ func (me *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal([]byte(rawPayload), payload)
 	if err != nil {
 		log.Println("Failed to unmarshal payload: ", err)
-		log.Println("Raw payload: ", rawPayload)
+		if me.debug {
+			log.Println("Raw payload: ", rawPayload)
+		}
 		return
 	}
 
