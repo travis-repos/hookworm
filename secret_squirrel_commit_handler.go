@@ -73,6 +73,7 @@ func init() {
 }
 
 type SecretSquirrelCommitHandler struct {
+	debug           bool
 	emailer         *Emailer
 	fromAddr        string
 	recipients      []string
@@ -97,7 +98,38 @@ type secretCommitEmailContext struct {
 }
 
 func (me *SecretSquirrelCommitHandler) HandlePayload(payload *Payload) error {
-	me.checkIfSecretSquirrelCommit(payload)
+	if !me.isPolicedBranch(payload.Ref.String()) {
+		if me.debug {
+			log.Printf("%v is not a policed branch, yay!\n", payload.Ref.String())
+		}
+		return nil
+	}
+
+	if me.debug {
+		log.Printf("%v is a policed branch!\n", payload.Ref.String())
+	}
+
+	if payload.IsPullRequestMerge() {
+		if me.debug {
+			log.Printf("%v is a pull request merge, yay!\n", payload.HeadCommit.Id.String())
+		}
+		return nil
+	}
+
+	if me.debug {
+		log.Printf("%v is not a pull request merge!\n", payload.HeadCommit.Id.String())
+	}
+
+	if err := me.alert(payload); err != nil {
+		if me.debug {
+			log.Printf("ERROR sending alert: %+v\n", err)
+		}
+		return err
+	}
+
+	if me.debug {
+		log.Printf("Sent alert to %+v\n", me.recipients)
+	}
 	return nil
 }
 
@@ -107,29 +139,6 @@ func (me *SecretSquirrelCommitHandler) SetNextHandler(handler Handler) {
 
 func (me *SecretSquirrelCommitHandler) NextHandler() Handler {
 	return me.nextHandler
-}
-
-func (me *SecretSquirrelCommitHandler) checkIfSecretSquirrelCommit(payload *Payload) {
-	if !me.isPolicedBranch(payload.Ref.String()) {
-		log.Printf("%v is not a policed branch, yay!\n", payload.Ref.String())
-		return
-	}
-
-	log.Printf("%v is a policed branch!\n", payload.Ref.String())
-
-	if payload.IsPullRequestMerge() {
-		log.Printf("%v is a pull request merge, yay!\n", payload.HeadCommit.Id.String())
-		return
-	}
-
-	log.Printf("%v is not a pull request merge!\n", payload.HeadCommit.Id.String())
-
-	if err := me.alert(payload); err != nil {
-		log.Printf("ERROR sending alert: %+v\n", err)
-		return
-	}
-
-	log.Printf("Sent alert to %+v\n", me.recipients)
 }
 
 func (me *SecretSquirrelCommitHandler) isPolicedBranch(ref string) bool {
@@ -143,10 +152,11 @@ func (me *SecretSquirrelCommitHandler) isPolicedBranch(ref string) bool {
 }
 
 func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
-	// FIXME use the emailer thing here
-	log.Printf("WARNING secret squirrel commit! %+v\n", payload)
+	log.Printf("WARNING secret squirrel commit! %+v, head commit: %+v\n",
+		payload, payload.HeadCommit)
 	if len(me.recipients) == 0 {
 		log.Println("No email recipients specified, so no emailing!")
+		return nil
 	}
 
 	hc := payload.HeadCommit
@@ -173,6 +183,8 @@ func (me *SecretSquirrelCommitHandler) alert(payload *Payload) error {
 		return err
 	}
 
-	log.Printf("Email message:\n%v\n", string(emailBuf.Bytes()))
+	if me.debug {
+		log.Printf("Email message:\n%v\n", string(emailBuf.Bytes()))
+	}
 	return me.emailer.Send(me.fromAddr, me.recipients, emailBuf.Bytes())
 }

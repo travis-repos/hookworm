@@ -8,19 +8,22 @@ import (
 type EventLogHandler struct {
 	sysLogger   *log.Logger
 	nextHandler Handler
+	debug       bool
 }
 
 func (me *EventLogHandler) HandlePayload(payload *Payload) error {
-	asJsonBytes, err := json.Marshal(payload)
+	asJsonBytes, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		log.Println("Failed to re-serialize payload:", err)
 		return err
 	}
 	asJson := string(asJsonBytes)
 
-	log.Printf("pull request merge? %v\n", payload.IsPullRequestMerge())
-	log.Printf("payload=%+v\n", payload)
-	log.Printf("payload json=%v\n", asJson)
+	log.Printf("Pull request merge? %v\n", payload.IsPullRequestMerge())
+	if me.debug {
+		log.Printf("payload=%+v\n", payload)
+		log.Printf("payload json=%v\n", asJson)
+	}
 
 	if me.sysLogger != nil {
 		me.sysLogger.Println(asJson)
